@@ -8,6 +8,8 @@ import (
 	"net/http"
 
 	"github.com/lomocoin/neo-go-sdk/neo/models/request"
+	resp "github.com/lomocoin/neo-go-sdk/neo/models/response"
+	"github.com/pkg/errors"
 )
 
 func executeRequest(method string, bodyParameters []interface{}, nodeURI string, model interface{}) error {
@@ -43,7 +45,7 @@ func executeRequest(method string, bodyParameters []interface{}, nodeURI string,
 
 	if response.StatusCode != 200 {
 		return fmt.Errorf(
-			"Non-200 status code returned from NEO node, got: '%d'",
+			"non-200 status code returned from NEO node, got: '%d'",
 			response.StatusCode,
 		)
 	}
@@ -56,6 +58,15 @@ func executeRequest(method string, bodyParameters []interface{}, nodeURI string,
 	err = json.Unmarshal(bytes, &model)
 	if err != nil {
 		return err
+	}
+
+	// handle error response info
+	var errorResp resp.Error
+	err = json.Unmarshal(bytes, &errorResp)
+	if err != nil {
+		return err
+	} else if errorResp.Error.Message != "" {
+		return errors.Errorf("error code: %v, error message: %v", errorResp.Error.Code, errorResp.Error.Message)
 	}
 
 	return nil
