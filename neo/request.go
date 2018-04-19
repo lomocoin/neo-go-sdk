@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/CityOfZion/neo-go-sdk/neo/models/request"
+	"github.com/lomocoin/neo-go-sdk/neo/models/request"
 )
 
 func executeRequest(method string, bodyParameters []interface{}, nodeURI string, model interface{}) error {
@@ -41,7 +41,7 @@ func executeRequest(method string, bodyParameters []interface{}, nodeURI string,
 	}
 	defer response.Body.Close()
 
-	if response.StatusCode > 200 {
+	if response.StatusCode != 200 {
 		return fmt.Errorf(
 			"Non-200 status code returned from NEO node, got: '%d'",
 			response.StatusCode,

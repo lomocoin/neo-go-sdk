@@ -7,8 +7,8 @@ import (
 	"net"
 	"net/url"
 
-	"github.com/CityOfZion/neo-go-sdk/neo/models"
-	"github.com/CityOfZion/neo-go-sdk/neo/models/response"
+	"github.com/lomocoin/neo-go-sdk/neo/models"
+	"github.com/lomocoin/neo-go-sdk/neo/models/response"
 )
 
 type (
@@ -45,14 +45,14 @@ func NewClientUsingMultipleNodes(nodeURIs []string) (*Client, error) {
 
 // GetBestBlockHash returns the hash of the best block in the chain.
 func (c Client) GetBestBlockHash() (string, error) {
-	var response response.String
+	var resp response.String
 
-	err := executeRequest("getbestblockhash", nil, c.Node, &response)
+	err := executeRequest("getbestblockhash", nil, c.Node, &resp)
 	if err != nil {
 		return "", err
 	}
 
-	return response.Result, nil
+	return resp.Result, nil
 }
 
 // GetBlockByHash returns the corresponding block information according to the specified
@@ -61,14 +61,14 @@ func (c Client) GetBlockByHash(hash string) (*models.Block, error) {
 	requestBodyParams := []interface{}{
 		hash, 1,
 	}
-	var response response.Block
+	var resp response.Block
 
-	err := executeRequest("getblock", requestBodyParams, c.Node, &response)
+	err := executeRequest("getblock", requestBodyParams, c.Node, &resp)
 	if err != nil {
 		return nil, err
 	}
 
-	return &response.Result, nil
+	return &resp.Result, nil
 }
 
 // GetBlockByIndex returns the corresponding block information according to the specified
@@ -77,26 +77,26 @@ func (c Client) GetBlockByIndex(index int64) (*models.Block, error) {
 	requestBodyParams := []interface{}{
 		index, 1,
 	}
-	var response response.Block
+	var resp response.Block
 
-	err := executeRequest("getblock", requestBodyParams, c.Node, &response)
+	err := executeRequest("getblock", requestBodyParams, c.Node, &resp)
 	if err != nil {
 		return nil, err
 	}
 
-	return &response.Result, nil
+	return &resp.Result, nil
 }
 
 // GetBlockCount returns the number of blocks in the chain.
 func (c Client) GetBlockCount() (int64, error) {
-	var response response.Integer
+	var resp response.Integer
 
-	err := executeRequest("getblockcount", nil, c.Node, &response)
+	err := executeRequest("getblockcount", nil, c.Node, &resp)
 	if err != nil {
 		return 0, err
 	}
 
-	return response.Result, nil
+	return resp.Result, nil
 }
 
 // GetBlockHash returns the hash value of the corresponding block based on the specified
@@ -105,26 +105,26 @@ func (c Client) GetBlockHash(index int64) (string, error) {
 	requestBodyParams := []interface{}{
 		index,
 	}
-	var response response.String
+	var resp response.String
 
-	err := executeRequest("getblockhash", requestBodyParams, c.Node, &response)
+	err := executeRequest("getblockhash", requestBodyParams, c.Node, &resp)
 	if err != nil {
 		return "", err
 	}
 
-	return response.Result, nil
+	return resp.Result, nil
 }
 
 // GetConnectionCount returns the current number of connections for the node.
 func (c Client) GetConnectionCount() (int64, error) {
-	var response response.Integer
+	var resp response.Integer
 
-	err := executeRequest("getconnectioncount", nil, c.Node, &response)
+	err := executeRequest("getconnectioncount", nil, c.Node, &resp)
 	if err != nil {
 		return 0, err
 	}
 
-	return response.Result, nil
+	return resp.Result, nil
 }
 
 // GetStorage takes a smart contract hash and a storage key, and returns the storage value
@@ -133,14 +133,14 @@ func (c Client) GetStorage(scriptHash string, storageKey string) (string, error)
 	requestBodyParams := []interface{}{
 		scriptHash, hex.EncodeToString([]byte(storageKey)),
 	}
-	var response response.String
+	var resp response.String
 
-	err := executeRequest("getstorage", requestBodyParams, c.Node, &response)
+	err := executeRequest("getstorage", requestBodyParams, c.Node, &resp)
 	if err != nil {
 		return "", err
 	}
 
-	return response.Result, nil
+	return resp.Result, nil
 }
 
 // GetTransaction returns the corresponding transaction information based on the
@@ -149,14 +149,14 @@ func (c Client) GetTransaction(hash string) (*models.Transaction, error) {
 	requestBodyParams := []interface{}{
 		hash, 1,
 	}
-	var response response.Transaction
+	var resp response.Transaction
 
-	err := executeRequest("getrawtransaction", requestBodyParams, c.Node, &response)
+	err := executeRequest("getrawtransaction", requestBodyParams, c.Node, &resp)
 	if err != nil {
 		return nil, err
 	}
 
-	return &response.Result, nil
+	return &resp.Result, nil
 }
 
 // GetTransactionOutput returns the corresponding transaction output (change) information
@@ -165,14 +165,14 @@ func (c Client) GetTransactionOutput(hash string, index int64) (*models.Vout, er
 	requestBodyParams := []interface{}{
 		hash, index,
 	}
-	var response response.Vout
+	var resp response.Vout
 
-	err := executeRequest("gettxout", requestBodyParams, c.Node, &response)
+	err := executeRequest("gettxout", requestBodyParams, c.Node, &resp)
 	if err != nil {
 		return nil, err
 	}
 
-	return &response.Result, nil
+	return &resp.Result, nil
 }
 
 // GetUnconfirmedTransactions returns a slice of transaction hashes that are all
@@ -244,35 +244,93 @@ func (c Client) ValidateAddress(address string) (bool, error) {
 	requestBodyParams := []interface{}{
 		address,
 	}
-	var response response.StringMap
+	var resp response.StringMap
 
-	err := executeRequest("validateaddress", requestBodyParams, c.Node, &response)
+	err := executeRequest("validateaddress", requestBodyParams, c.Node, &resp)
 	if err != nil {
 		return false, err
 	}
 
-	if _, ok := response.Result["address"]; !ok {
+	if _, ok := resp.Result["address"]; !ok {
 		return false, nil
 	}
 
-	if _, ok := response.Result["address"].(string); !ok {
+	if _, ok := resp.Result["address"].(string); !ok {
 		return false, nil
 	}
 
-	if _, ok := response.Result["isvalid"]; !ok {
+	if _, ok := resp.Result["isvalid"]; !ok {
 		return false, nil
 	}
 
-	if _, ok := response.Result["isvalid"].(bool); !ok {
+	if _, ok := resp.Result["isvalid"].(bool); !ok {
 		return false, nil
 	}
 
-	returnedAddress := response.Result["address"].(string)
-	valid := response.Result["isvalid"].(bool)
+	returnedAddress := resp.Result["address"].(string)
+	valid := resp.Result["isvalid"].(bool)
 
 	if address == returnedAddress && valid {
 		return true, nil
 	}
 
 	return false, nil
+}
+
+// GetBalance 根据指定的资产编号，返回钱包中对应资产的余额信息
+// 执行此命令前需要在 Neo-CLI 节点中打开钱包
+func (c Client) GetBalance(assetID string) (balance, confirmed string, err error) {
+	requestBodyParams := []interface{}{
+		assetID,
+	}
+	type jd struct {
+		Balance   string `json:"balance"`
+		Confirmed string `json:"confirmed"`
+	}
+	var resp struct {
+		response.StringMap
+		Result jd `json:"result"`
+	}
+
+	err = executeRequest("getbalance", requestBodyParams, c.Node, &resp)
+	if err != nil {
+		return
+	}
+	balance, confirmed = resp.Result.Balance, resp.Result.Confirmed
+	return
+}
+
+// GetNewAddress 创建一个新的地址
+// 执行此命令前需要在 Neo-CLI 节点中打开钱包
+func (c Client) GetNewAddress() (address string, err error) {
+	var resp struct {
+		response.StringMap
+		Result string `json:"result"`
+	}
+
+	err = executeRequest("getnewaddress", nil, c.Node, &resp)
+	if err != nil {
+		return
+	}
+	address = resp.Result
+	return
+}
+
+// SendToAddress 向指定地址转账
+// 执行此命令前需要在 Neo-CLI 节点中打开钱包
+func (c Client) SendToAddress(assetID, toAddress string, amount interface{}) (txID string, err error) {
+	requestBodyParams := []interface{}{
+		assetID,
+		toAddress,
+		amount,
+	}
+
+	var resp response.Transaction
+
+	err = executeRequest("sendtoaddress", requestBodyParams, c.Node, &resp)
+	if err != nil {
+		return
+	}
+	txID = resp.Result.ID
+	return
 }

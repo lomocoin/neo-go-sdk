@@ -3,7 +3,7 @@ package neo_test
 import (
 	"testing"
 
-	"github.com/CityOfZion/neo-go-sdk/neo"
+	"github.com/lomocoin/neo-go-sdk/neo"
 	"github.com/stretchr/testify/assert"
 )
 
